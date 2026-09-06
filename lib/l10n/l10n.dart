@@ -4,12 +4,13 @@ import 'package:intl/intl.dart';
 
 import 'app_localizations.dart';
 import 'catalog_es.dart';
+import 'catalog_it.dart';
 import 'catalog_zh.dart';
 
 export 'app_localizations.dart';
 
-const Map<String, Map<String, String>> _catalogNames = {'es': kExerciseNameEs, 'zh': kExerciseNameZh};
-const Map<String, Map<String, List<String>>> _catalogSteps = {'es': kExerciseStepsEs, 'zh': kExerciseStepsZh};
+const Map<String, Map<String, String>> _catalogNames = {'es': kExerciseNameEs, 'it': kExerciseNameIt, 'zh': kExerciseNameZh};
+const Map<String, Map<String, List<String>>> _catalogSteps = {'es': kExerciseStepsEs, 'it': kExerciseStepsIt, 'zh': kExerciseStepsZh};
 
 String appLanguage = 'en';
 AppLocalizations t = lookupAppLocalizations(const Locale('en'));

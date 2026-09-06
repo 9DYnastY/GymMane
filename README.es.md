@@ -42,7 +42,7 @@ y mira cómo se mueven tus números.
 <br/>
 <br/>
 
-<sub><a href="README.md">English</a> · <b>Español</b></sub>
+<sub><a href="README.md">English</a> · <b>Español</b> · <a href="README.it.md">Italiano</a></sub>
 
 </div>
 
