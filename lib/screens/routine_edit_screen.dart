@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-import '../catalog/exercise_catalog.dart';
 import '../l10n/l10n.dart';
 import '../models/exercise.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../widgets/exercise_filter_bar.dart';
 import '../widgets/exercise_media.dart';
 import '../widgets/svg_icon.dart';
 import '../widgets/ui_kit.dart';
@@ -24,6 +24,9 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
       TextEditingController(text: fit.activeRoutine?.name ?? '');
   final TextEditingController _search = TextEditingController();
   String _q = '';
+  bool _favsOnly = false;
+  String? _muscle;
+  String? _difficulty;
 
   @override
   void dispose() {
@@ -33,9 +36,14 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
   }
 
   List<Exercise> get _filtered {
-    final q = _q.trim().toLowerCase();
-    if (q.isEmpty) return kExercises;
-    return kExercises.where((e) => e.name.toLowerCase().contains(q)).toList();
+    return filterExerciseList(
+      fit.allExercises,
+      query: _q,
+      favoritesOnly: _favsOnly,
+      favorites: fit.favorites,
+      muscleFilter: _muscle,
+      difficultyFilter: _difficulty,
+    );
   }
 
   @override
@@ -53,9 +61,29 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-              itemCount: list.length + 1,
+              itemCount: (list.isEmpty ? 1 : list.length) + 1,
               itemBuilder: (context, i) {
                 if (i == 0) return _header(gc, routine.exerciseIds.length);
+                if (list.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 36),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(PhosphorIconsRegular.magnifyingGlass, size: 36, color: gc.textTertiary),
+                          const SizedBox(height: 10),
+                          Text(t.noExercisesFound,
+                              style: AppTheme.s(14, weight: FontWeight.w600, color: gc.text)),
+                          const SizedBox(height: 4),
+                          Text(t.noExercisesHint,
+                              textAlign: TextAlign.center,
+                              style: AppTheme.s(12, color: gc.textSecondary)),
+                        ],
+                      ),
+                    ),
+                  );
+                }
                 return _pickRow(gc, list[i - 1]);
               },
             ),
@@ -130,6 +158,7 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
             shrinkWrap: true,
             buildDefaultDragHandles: false,
             physics: const NeverScrollableScrollPhysics(),
+            // ignore: deprecated_member_use
             onReorder: (from, to) => fit.reorderRoutineExercise(routine.id, from, to),
             children: [
               for (int i = 0; i < fit.routineExercises(routine).length; i++)
@@ -137,33 +166,25 @@ class _RoutineEditScreenState extends State<RoutineEditScreen> {
             ],
           ),
         ],
-        const SizedBox(height: 20),
-        Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: gc.bgRaised,
-            border: Border.all(color: gc.border),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Row(children: [
-            SvgPathIcon(Ic.search, size: 16, color: gc.textSecondary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextField(
-                controller: _search,
-                onChanged: (v) => setState(() => _q = v),
-                style: AppTheme.s(14, color: gc.text),
-                cursorColor: gc.accent,
-                decoration: InputDecoration(
-                  isCollapsed: true,
-                  border: InputBorder.none,
-                  hintText: t.addExercises,
-                  hintStyle: AppTheme.s(14, color: gc.textSecondary),
-                ),
-              ),
-            ),
-          ]),
+        const SizedBox(height: 16),
+        ExerciseFilterBar(
+          searchController: _search,
+          searchHint: t.addExercises,
+          onSearchChanged: (v) => setState(() => _q = v),
+          favoritesOnly: _favsOnly,
+          onToggleFavorites: () => setState(() => _favsOnly = !_favsOnly),
+          selectedMuscle: _muscle,
+          onSelectMuscle: (m) => setState(() => _muscle = m),
+          selectedDifficulty: _difficulty,
+          onSelectDifficulty: (d) => setState(() => _difficulty = d),
+          favoriteCount: fit.favouriteCount,
+          onClearAll: () => setState(() {
+            _search.clear();
+            _q = '';
+            _favsOnly = false;
+            _muscle = null;
+            _difficulty = null;
+          }),
         ),
         const SizedBox(height: 12),
       ],
