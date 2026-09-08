@@ -42,7 +42,7 @@ and watch your numbers move.
 <br/>
 <br/>
 
-<sub><b>English</b> · <a href="README.es.md">Español</a> · <a href="README.it.md">Italiano</a></sub>
+<sub><b>English</b> · <a href="README.es.md">Español</a> · <a href="README.it.md">Italiano</a> · <a href="README.zh.md">简体中文</a></sub>
 
 </div>
 
@@ -172,7 +172,7 @@ decorative.
 - Every photo, video and note you add stays in the app's own storage
 - Delete everything in one tap
 - Light and dark themes, kg or lb
-- English, Spanish and Italian, and a new language is just a pull request
+- English, Spanish, Italian and Simplified Chinese, and a new language is just a pull request
 
 </td>
 </tr>
@@ -228,7 +228,7 @@ Everything it *does* ask for, and why:
 
 ## 🌍 Translations
 
-GymMane speaks English, Spanish and Italian today, and more languages are very welcome.
+GymMane speaks English, Spanish, Italian and Simplified Chinese today, and more languages are very welcome.
 Translations live in plain [ARB files](lib/l10n) — one file per
 language, nothing to compile. There is no Weblate or Crowdin yet, so it goes
 through GitHub: edit the file and open a pull request.
