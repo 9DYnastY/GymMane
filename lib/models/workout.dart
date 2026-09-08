@@ -1,7 +1,7 @@
 class LoggedSet {
   LoggedSet(this.reps, this.weight);
-  final int reps;
-  final double weight;
+  int reps;
+  double weight;
   double get volume => reps * weight;
 
   double get oneRm => weight * (1 + reps / 30);
@@ -38,8 +38,8 @@ class LoggedExercise {
 
 class LoggedSession {
   LoggedSession(this.date, this.durationSec, this.exercises);
-  final DateTime date;
-  final int durationSec;
+  DateTime date;
+  int durationSec;
   final List<LoggedExercise> exercises;
 
   double get volume => exercises.fold(0.0, (s, e) => s + e.volume);

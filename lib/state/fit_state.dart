@@ -77,6 +77,7 @@ class FitState extends FitCore
         ..clear()
         ..addAll(((data['sessions'] as List?) ?? [])
             .map((e) => LoggedSession.fromJson((e as Map).cast<String, dynamic>())));
+      consolidateDailySessions();
       bodyweight
         ..clear()
         ..addAll(((data['bodyweight'] as List?) ?? [])
@@ -221,6 +222,7 @@ class FitState extends FitCore
       ..clear()
       ..addAll(((map['sessions'] as List?) ?? [])
           .map((e) => LoggedSession.fromJson((e as Map).cast<String, dynamic>())));
+    consolidateDailySessions();
     bodyweight
       ..clear()
       ..addAll(((map['bodyweight'] as List?) ?? [])
@@ -231,6 +233,29 @@ class FitState extends FitCore
     _refreshWidgets();
     notifyListeners();
     return true;
+  }
+
+  void consolidateDailySessions() {
+    if (sessions.length <= 1) return;
+    final map = <DateTime, LoggedSession>{};
+    var changed = false;
+    for (final s in sessions) {
+      final k = _dayKey(s.date);
+      final existing = map[k];
+      if (existing == null) {
+        map[k] = s;
+      } else {
+        mergeLoggedSessions(existing, s);
+        changed = true;
+      }
+    }
+    if (changed) {
+      sessions
+        ..clear()
+        ..addAll(map.values)
+        ..sort((a, b) => a.date.compareTo(b.date));
+      _persist();
+    }
   }
 
   static String _normName(String s) =>
@@ -264,6 +289,7 @@ class FitState extends FitCore
       added++;
     }
     if (added > 0) {
+      consolidateDailySessions();
       sessions.sort((a, b) => a.date.compareTo(b.date));
       _persist();
       _refreshWidgets();

@@ -71,6 +71,7 @@ class _IconPainter extends CustomPainter {
 class Ic {
   Ic._();
   static const flame = [IconPath('M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1.5-.5-2-1-3 2 1 3 3 3 5a5 5 0 0 1-10 0c0-5 4-6 5-11z', fill: true)];
+  static const plus = [IconPath('M12 5v14M5 12h14', strokeWidth: 2)];
   static const play = [IconPath('M8 5v14l11-7z', fill: true)];
   static const barbell = [IconPath('M6 4v16M18 4v16M2 9h4M18 9h4M2 15h4M18 15h4M6 12h12', strokeWidth: 2)];
   static const barbellThin = [IconPath('M6 7v10M18 7v10M2 12h4M18 12h4M9 9v6M15 9v6', strokeWidth: 1.8)];

@@ -139,7 +139,97 @@ mixin StatsState on FitCore, ToolsState, LibraryState {
     s.exercises.remove(e);
     if (s.exercises.isEmpty) sessions.remove(s);
     persistNow();
+    _refreshWidgets();
     notifyListeners();
+  }
+
+  List<LoggedSession> get allLoggedSessionsDesc =>
+      [...sessions]..sort((a, b) => b.date.compareTo(a.date));
+
+  void updateLoggedSet(LoggedSession s, LoggedExercise e, int setIdx, {int? reps, double? weight}) {
+    if (setIdx < 0 || setIdx >= e.sets.length) return;
+    final st = e.sets[setIdx];
+    if (reps != null) st.reps = reps;
+    if (weight != null) st.weight = weight;
+    persistNow();
+    _refreshWidgets();
+    notifyListeners();
+  }
+
+  void addLoggedSet(LoggedSession s, LoggedExercise e, {int? reps, double? weight}) {
+    final last = e.sets.isNotEmpty ? e.sets.last : null;
+    final r = reps ?? last?.reps ?? 10;
+    final w = weight ?? last?.weight ?? 20.0;
+    e.sets.add(LoggedSet(r, w));
+    persistNow();
+    _refreshWidgets();
+    notifyListeners();
+  }
+
+  void removeLoggedSet(LoggedSession s, LoggedExercise e, int setIdx) {
+    if (setIdx < 0 || setIdx >= e.sets.length) return;
+    e.sets.removeAt(setIdx);
+    if (e.sets.isEmpty) {
+      s.exercises.remove(e);
+      if (s.exercises.isEmpty) {
+        sessions.remove(s);
+      }
+    }
+    persistNow();
+    _refreshWidgets();
+    notifyListeners();
+  }
+
+  void addLoggedExercise(LoggedSession s, Exercise ex, {int reps = 10, double weight = 20.0}) {
+    s.exercises.add(LoggedExercise(ex.id, ex.name, ex.primary, [LoggedSet(reps, weight)]));
+    persistNow();
+    _refreshWidgets();
+    notifyListeners();
+  }
+
+  LoggedSession updateSessionDate(LoggedSession s, DateTime newDate) {
+    final targetKey = _dayKey(newDate);
+    final currentKey = _dayKey(s.date);
+    if (targetKey == currentKey) {
+      s.date = newDate;
+      persistNow();
+      _refreshWidgets();
+      notifyListeners();
+      return s;
+    }
+    final existingIndex = sessions.indexWhere((x) => x != s && _dayKey(x.date) == targetKey);
+    if (existingIndex >= 0) {
+      final target = sessions[existingIndex];
+      mergeLoggedSessions(target, s);
+      sessions.remove(s);
+      sessions.sort((a, b) => a.date.compareTo(b.date));
+      persistNow();
+      _refreshWidgets();
+      notifyListeners();
+      return target;
+    } else {
+      s.date = newDate;
+      sessions.sort((a, b) => a.date.compareTo(b.date));
+      persistNow();
+      _refreshWidgets();
+      notifyListeners();
+      return s;
+    }
+  }
+
+  LoggedSession createPastSession(DateTime date, {int durationSec = 1800}) {
+    final k = _dayKey(date);
+    final existingIndex = sessions.indexWhere((s) => _dayKey(s.date) == k);
+    if (existingIndex >= 0) {
+      return sessions[existingIndex];
+    }
+    final s = LoggedSession(date, durationSec, []);
+    sessions.add(s);
+    sessions.sort((a, b) => a.date.compareTo(b.date));
+    persistNow();
+    _refreshWidgets();
+    notifyListeners();
+    return s;
   }
 
   void deleteBodyweight(BodyweightEntry e) {

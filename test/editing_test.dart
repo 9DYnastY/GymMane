@@ -119,4 +119,58 @@ void main() {
     expect(fit.importJson('{"profile":{"name":"Legacy"}}'), true);
     expect(fit.onboarded, true);
   });
+
+  test('updating weight or reps in a logged set recalculates volume and PRs', () {
+    final s = log('Bench', 60);
+    expect(s.volume, 300);
+    expect(fit.personalRecords.first.topWeight, 60);
+
+    fit.updateLoggedSet(s, s.exercises.first, 0, weight: 80, reps: 6);
+    expect(s.volume, 480);
+    expect(fit.personalRecords.first.topWeight, 80);
+  });
+
+  test('adding and removing sets updates session volume and set count', () {
+    final s = log('Bench', 60);
+    expect(s.setCount, 1);
+    expect(s.volume, 300);
+
+    fit.addLoggedSet(s, s.exercises.first, reps: 8, weight: 70);
+    expect(s.setCount, 2);
+    expect(s.volume, 300 + 560);
+
+    fit.removeLoggedSet(s, s.exercises.first, 0);
+    expect(s.setCount, 1);
+    expect(s.volume, 560);
+  });
+
+  test('retroactively creating a past session is reflected in history and date queries', () {
+    final past = DateTime.now().subtract(const Duration(days: 3));
+    final s = fit.createPastSession(past);
+    expect(fit.sessionsOn(past), contains(s));
+
+    final ex = fit.allExercises.first;
+    fit.addLoggedExercise(s, ex, reps: 10, weight: 50);
+    expect(s.exercises.length, 1);
+    expect(s.volume, 500);
+  });
+
+  test('updating session date re-sorts sessions correctly', () {
+    final s1 = fit.createPastSession(DateTime.now().subtract(const Duration(days: 5)));
+    final s2 = fit.createPastSession(DateTime.now().subtract(const Duration(days: 1)));
+    expect(fit.allLoggedSessionsDesc.first, s2);
+
+    fit.updateSessionDate(s1, DateTime.now());
+    expect(fit.allLoggedSessionsDesc.first, s1);
+  });
+
+  test('starting from a logged session loads all exercises into live session', () {
+    final s = log('Bench', 60);
+    fit.startFromLoggedSession(s);
+    expect(fit.isSessionActive, true);
+    expect(fit.session?.exercises.length, 1);
+    expect(fit.session?.exercises.first.sets.first.weight, 60);
+    expect(fit.session?.exercises.first.sets.first.done, false);
+    fit.discardSession();
+  });
 }

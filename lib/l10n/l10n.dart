@@ -112,6 +112,60 @@ extension GymL10n on AppLocalizations {
         _ => 'FAT',
       };
 
+  String get workoutHistory => switch (appLanguage) {
+        'zh' => '训练历史',
+        'es' => 'HISTORIAL',
+        _ => 'WORKOUT HISTORY',
+      };
+
+  String get logPastWorkout => switch (appLanguage) {
+        'zh' => '补录训练',
+        'es' => 'REGISTRAR SESIÓN',
+        _ => 'LOG WORKOUT',
+      };
+
+  String get repeatWorkout => switch (appLanguage) {
+        'zh' => '以此模板开练',
+        'es' => 'REPETIR SESIÓN',
+        _ => 'REPEAT WORKOUT',
+      };
+
+  String get editWorkout => switch (appLanguage) {
+        'zh' => '编辑训练',
+        'es' => 'EDITAR SESIÓN',
+        _ => 'EDIT WORKOUT',
+      };
+
+  String get addExerciseToSession => switch (appLanguage) {
+        'zh' => '添加动作',
+        'es' => 'AÑADIR EJERCICIO',
+        _ => 'ADD EXERCISE',
+      };
+
+  String get addSet => switch (appLanguage) {
+        'zh' => '添加组',
+        'es' => 'Añadir serie',
+        _ => 'Add set',
+      };
+
+  String get noWorkoutsYet => switch (appLanguage) {
+        'zh' => '暂无历史训练记录',
+        'es' => 'No hay sesiones registradas',
+        _ => 'No workouts recorded yet',
+      };
+
+  String get logWorkoutOnDate => switch (appLanguage) {
+        'zh' => '在此日期补录训练',
+        'es' => 'Registrar sesión en esta fecha',
+        _ => 'Log workout on this date',
+      };
+
+  String get deleteSessionConfirm => switch (appLanguage) {
+        'zh' => '确定要删除整场训练吗？此操作无法撤销。',
+        'es' => '¿Eliminar toda la sesión? Esta acción no se puede deshacer.',
+        _ => 'Delete this entire session? This cannot be undone.',
+      };
+
   String bmiCategory(String key) => switch (key) {
         'Underweight' => bmiUnderweight,
         'Normal' => bmiNormal,

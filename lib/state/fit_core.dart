@@ -10,6 +10,27 @@ double _round3(double n) => (n * 1000).round() / 1000;
 double _roundTo(double n, double step) => (n / step).round() * step;
 DateTime _dayKey(DateTime d) => DateTime(d.year, d.month, d.day);
 
+void mergeLoggedSessions(LoggedSession target, LoggedSession incoming) {
+  target.durationSec += incoming.durationSec;
+  if (incoming.date.isAfter(target.date)) {
+    target.date = incoming.date;
+  }
+  for (final incEx in incoming.exercises) {
+    LoggedExercise? existingEx;
+    for (final e in target.exercises) {
+      if (e.id == incEx.id) {
+        existingEx = e;
+        break;
+      }
+    }
+    if (existingEx != null) {
+      existingEx.sets.addAll(incEx.sets);
+    } else {
+      target.exercises.add(incEx);
+    }
+  }
+}
+
 const int kHeatmapDays = 84;
 
 abstract class FitCore extends ChangeNotifier {
