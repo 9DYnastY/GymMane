@@ -41,4 +41,50 @@ void main() {
 
     fit.saveAndExit();
   });
+
+  test('startFocusWorkout pre-selects suggested focus muscles and enters select step', () {
+    fit.sessions.clear();
+    fit.selectedMuscles.clear();
+    fit.route = 'home';
+
+    final suggested = fit.suggestedFocus;
+    expect(suggested.muscles, isNotEmpty);
+
+    fit.startFocusWorkout();
+
+    expect(fit.route, 'train');
+    expect(fit.trainStep, 'select');
+    expect(fit.selectedMuscles, suggested.muscles);
+
+    // Can proceed to review directly
+    fit.trainContinue();
+    expect(fit.trainStep, 'review');
+    expect(fit.sessionPicks, isNotEmpty);
+  });
+
+  test('toggleResetPicks clears picks when non-empty, and restores defaults when empty', () {
+    fit.sessions.clear();
+    fit.selectedMuscles.clear();
+    fit.startFocusWorkout();
+    fit.trainContinue();
+
+    expect(fit.sessionPicks, isNotEmpty);
+    final defaultCount = fit.sessionPicks.length;
+
+    // First toggle: clears all picks
+    fit.toggleResetPicks();
+    expect(fit.sessionPicks, isEmpty);
+
+    // Second toggle: restores default picks
+    fit.toggleResetPicks();
+    expect(fit.sessionPicks.length, defaultCount);
+
+    // Direct clearPicks
+    fit.clearPicks();
+    expect(fit.sessionPicks, isEmpty);
+
+    // Direct resetDefaultPicks
+    fit.resetDefaultPicks();
+    expect(fit.sessionPicks.length, defaultCount);
+  });
 }

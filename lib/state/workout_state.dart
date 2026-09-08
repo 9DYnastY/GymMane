@@ -11,12 +11,20 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   int _elapsedBefore = 0;
   bool sessionPaused = false;
 
-  void startWorkout() {
+  void startWorkout([List<String>? muscles]) {
     if (route != 'train') prevRoute = route;
     route = 'train';
     trainStep = 'select';
+    if (muscles != null) {
+      selectedMuscles
+        ..clear()
+        ..addAll(muscles);
+      sessionPicks.clear();
+    }
     notifyListeners();
   }
+
+  void startFocusWorkout() => startWorkout(suggestedFocus.muscles);
 
   List<Exercise> getFilteredExercises(List<String> sel) {
     if (sel.isEmpty) return const [];
@@ -94,6 +102,26 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
 
   bool isPicked(String id) => sessionPicks.contains(id);
 
+  void clearPicks() {
+    sessionPicks.clear();
+    notifyListeners();
+  }
+
+  void resetDefaultPicks() {
+    sessionPicks
+      ..clear()
+      ..addAll(_defaultPicks(selectedMuscles).map((e) => e.id));
+    notifyListeners();
+  }
+
+  void toggleResetPicks() {
+    if (sessionPicks.isNotEmpty) {
+      clearPicks();
+    } else {
+      resetDefaultPicks();
+    }
+  }
+
   void trainBack() {
     trainStep = 'select';
     notifyListeners();
@@ -116,6 +144,25 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   void startSession() {
     final exs = allExercises.where((e) => sessionPicks.contains(e.id)).toList();
     if (exs.isNotEmpty) _beginSession(exs);
+  }
+
+  void startFromLoggedSession(LoggedSession ls) {
+    if (ls.exercises.isEmpty) return;
+    final s = WorkoutSession();
+    s.exercises = ls.exercises.map((le) {
+      final sets = le.sets.isNotEmpty
+          ? le.sets.map((l) => SessionSet(l.reps, l.weight, false)).toList()
+          : [SessionSet(10, 20, false), SessionSet(10, 20, false), SessionSet(10, 20, false)];
+      return SessionExercise(le.id, le.name, le.primary, sets);
+    }).toList();
+    _restTimer?.cancel();
+    _elapsedBefore = 0;
+    sessionPaused = false;
+    _startTicking();
+    session = s;
+    route = 'session';
+    persistNow();
+    notifyListeners();
   }
 
   void _beginSession(List<Exercise> exs) {
@@ -146,6 +193,12 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   int get sessionElapsed => _runningSince == null
       ? _elapsedBefore
       : _elapsedBefore + DateTime.now().difference(_runningSince!).inSeconds;
+
+  @visibleForTesting
+  set debugElapsedSeconds(int sec) {
+    _elapsedBefore = sec;
+    _runningSince = null;
+  }
 
   void toggleSessionPause() {
     if (sessionPaused) {
@@ -279,7 +332,14 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   void addExerciseToSession(String id) {
     final s = session;
     final ex = exerciseById(id);
-    if (s == null || ex == null || s.exercises.any((e) => e.id == id)) return;
+    if (s == null || ex == null) return;
+    final existingIdx = s.exercises.indexWhere((e) => e.id == id);
+    if (existingIdx >= 0) {
+      s.currentIndex = existingIdx;
+      persistNow();
+      notifyListeners();
+      return;
+    }
     final last = lastSetsFor(id);
     s.exercises.add(SessionExercise(
       ex.id,
@@ -333,8 +393,19 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
           logged.add(LoggedExercise(e.id, e.name, e.primary, doneSets));
         }
       }
-      sessions.add(LoggedSession(DateTime.now(), s.summaryDuration ?? 0, logged));
-      _computeSummaryHighlights(logged);
+      final now = DateTime.now();
+      final k = _dayKey(now);
+      final existingIndex = sessions.indexWhere((s) => _dayKey(s.date) == k);
+      final LoggedSession target;
+      if (existingIndex >= 0) {
+        target = sessions[existingIndex];
+        mergeLoggedSessions(target, LoggedSession(now, s.summaryDuration ?? 0, logged));
+      } else {
+        target = LoggedSession(now, s.summaryDuration ?? 0, logged);
+        sessions.add(target);
+      }
+      sessions.sort((a, b) => a.date.compareTo(b.date));
+      _computeSummaryHighlights(logged, target);
     } else {
       summaryPrs = 0;
       summaryVsLast = null;
@@ -349,11 +420,12 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   int summaryPrs = 0;
   double? summaryVsLast;
 
-  void _computeSummaryHighlights(List<LoggedExercise> justLogged) {
+  void _computeSummaryHighlights(List<LoggedExercise> justLogged, [LoggedSession? currentSession]) {
+    final current = currentSession ?? (sessions.isNotEmpty ? sessions.last : null);
     var prs = 0;
     for (final e in justLogged) {
       final previousBest = sessions
-          .where((s) => s != sessions.last)
+          .where((s) => s != current)
           .expand((s) => s.exercises)
           .where((x) => x.id == e.id)
           .fold(0.0, (m, x) => math.max(m, x.bestOneRm));
@@ -363,7 +435,8 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
 
     final ids = justLogged.map((e) => e.id).toSet();
     LoggedSession? previous;
-    for (final s in sessions.reversed.skip(1)) {
+    for (final s in sessions.reversed) {
+      if (s == current) continue;
       if (s.exercises.any((e) => ids.contains(e.id))) {
         previous = s;
         break;

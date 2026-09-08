@@ -379,7 +379,7 @@ class _FocusHero extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(subtitle, style: AppTheme.s(14, color: gc.textSecondary)),
                   const SizedBox(height: 20),
-                  PrimaryButton(label: t.startWorkout, icon: Ic.play, onTap: fit.startWorkout),
+                  PrimaryButton(label: t.startWorkout, icon: Ic.play, onTap: fit.startFocusWorkout),
                 ],
               ),
             ),
