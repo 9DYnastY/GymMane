@@ -11,10 +11,15 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsSt
   int _elapsedBefore = 0;
   bool sessionPaused = false;
 
-  void startWorkout() {
+  void startWorkout([List<String>? initialMuscles]) {
+    selectedMuscles
+      ..clear()
+      ..addAll(initialMuscles ?? const []);
     trainStep = 'select';
     pushRoute('train');
   }
+
+  void startFocusWorkout() => startWorkout(suggestedFocus.muscles);
 
   List<Exercise> getFilteredExercises(List<String> sel) {
     if (sel.isEmpty) return const [];
