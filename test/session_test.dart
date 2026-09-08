@@ -182,4 +182,33 @@ void strengthTests() {
     expect(fit.activeStrengthId, 'a1');
     _reset();
   });
+
+  test('addExerciseToSession appends new exercise and navigates to it, jumps if existing', () {
+    _reset();
+    fit.startWorkout();
+    fit.toggleMuscle('chest');
+    fit.trainContinue();
+    fit.startSession();
+
+    final s = fit.session!;
+    final initialCount = s.exercises.length;
+    expect(initialCount, greaterThan(0));
+
+    // Find an exercise not currently in the session
+    final existingIds = s.exercises.map((e) => e.id).toSet();
+    final newEx = fit.allExercises.firstWhere((e) => !existingIds.contains(e.id));
+
+    // Add new exercise
+    fit.addExerciseToSession(newEx.id);
+    expect(s.exercises.length, initialCount + 1);
+    expect(s.currentIndex, s.exercises.length - 1);
+    expect(s.exercises.last.id, newEx.id);
+
+    // Adding an already existing exercise jumps to it without duplicating
+    final firstId = s.exercises.first.id;
+    fit.addExerciseToSession(firstId);
+    expect(s.exercises.length, initialCount + 1); // no duplicate
+    expect(s.currentIndex, 0); // jumped to first
+    _reset();
+  });
 }

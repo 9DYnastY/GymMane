@@ -8,6 +8,7 @@ import '../models/live_session.dart';
 import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import '../widgets/exercise_filter_bar.dart' show showExercisePickerSheet;
 import '../widgets/exercise_media.dart';
 import '../widgets/svg_icon.dart';
 import '../widgets/ui_kit.dart';
@@ -32,6 +33,8 @@ class SessionScreen extends StatelessWidget {
     final ex = fit.currentExercise;
     final exIdx = s.currentIndex;
     final def = fit.exerciseById(ex?.id ?? '') ?? kExercises.first;
+    final isFirst = s.currentIndex <= 0;
+    final isLast = s.currentIndex >= s.exercises.length - 1;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -207,11 +210,32 @@ class SessionScreen extends StatelessWidget {
           ),
         const SizedBox(height: 6),
         Row(children: [
-          _circleBtn(gc, Ic.chevronLeft, fit.prevExercise),
+          _circleBtn(
+            gc,
+            child: SvgPathIcon(Ic.chevronLeft, size: 18, color: isFirst ? gc.textTertiary : gc.text),
+            onTap: fit.prevExercise,
+          ),
           const SizedBox(width: 10),
           Expanded(child: PrimaryButton(label: t.finishSession, onTap: fit.finishSession, height: 56)),
           const SizedBox(width: 10),
-          _circleBtn(gc, Ic.chevronRightBold, fit.nextExercise),
+          isLast
+              ? _circleBtn(
+                  gc,
+                  child: Icon(PhosphorIconsRegular.plus, size: 20, color: gc.ember),
+                  bg: gc.emberSoft,
+                  borderColor: gc.ember.withValues(alpha: 0.3),
+                  onTap: () => showExercisePickerSheet(
+                    context,
+                    onPick: (chosen) => fit.addExerciseToSession(chosen.id),
+                  ),
+                  tooltip: t.addExercise,
+                )
+              : _circleBtn(
+                  gc,
+                  child: SvgPathIcon(Ic.chevronRightBold, size: 18, color: gc.text),
+                  onTap: fit.nextExercise,
+                  tooltip: t.next,
+                ),
         ]),
       ],
     );
@@ -467,20 +491,36 @@ class SessionScreen extends StatelessWidget {
     if (parsed != null) onSave(parsed);
   }
 
-  Widget _circleBtn(GymColors gc, List<IconPath> icon, VoidCallback onTap) {
-    return GestureDetector(
+  Widget _circleBtn(
+    GymColors gc, {
+    required Widget child,
+    required VoidCallback onTap,
+    Color? bg,
+    Color? borderColor,
+    String? tooltip,
+  }) {
+    final btn = GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: gc.bgRaised,
+          color: bg ?? gc.bgRaised,
           shape: BoxShape.circle,
-          border: Border.all(color: gc.border),
+          border: Border.all(color: borderColor ?? gc.border),
         ),
-        child: Center(child: SvgPathIcon(icon, size: 18, color: gc.text)),
+        child: Center(child: child),
       ),
     );
+    if (tooltip != null) {
+      return Semantics(
+        button: true,
+        label: tooltip,
+        child: Tooltip(message: tooltip, child: btn),
+      );
+    }
+    return btn;
   }
 
   Widget _complete(BuildContext context, GymColors gc) {
