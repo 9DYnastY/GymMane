@@ -41,4 +41,24 @@ void main() {
 
     fit.saveAndExit();
   });
+
+  test('startFocusWorkout pre-selects suggested focus muscles and enters select step', () {
+    fit.sessions.clear();
+    fit.selectedMuscles.clear();
+    fit.route = 'home';
+
+    final suggested = fit.suggestedFocus;
+    expect(suggested.muscles, isNotEmpty);
+
+    fit.startFocusWorkout();
+
+    expect(fit.route, 'train');
+    expect(fit.trainStep, 'select');
+    expect(fit.selectedMuscles, suggested.muscles);
+
+    // Can proceed to review directly
+    fit.trainContinue();
+    expect(fit.trainStep, 'review');
+    expect(fit.sessionPicks, isNotEmpty);
+  });
 }
