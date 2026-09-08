@@ -316,43 +316,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get totalVolume30d => '30天总容量';
 
   @override
-  String get volumeCumulative => 'Running total of every kilo you moved';
+  String get volumeCumulative => '累计训练总容量';
 
   @override
-  String get volumeChartEmpty => 'Log a session and the curve starts here';
+  String get volumeChartEmpty => '完成并记录一次训练，曲线将从这里启程';
 
   @override
-  String get weekRhythm => 'WEEK RHYTHM';
+  String get weekRhythm => '每周训练节奏';
 
   @override
-  String get weekRhythmHint => 'Which days you actually show up.';
+  String get weekRhythmHint => '真实反映你的周出勤规律。';
 
   @override
   String weekRhythmBest(String day) {
-    return '$day is your day';
+    return '周$day是你的主场';
   }
 
   @override
-  String get weekRhythmEmpty => 'Log a session and your week takes shape here.';
+  String get weekRhythmEmpty => '完成并记录一次训练，本周节奏即可在此呈现。';
 
   @override
-  String get allTime => 'ALL TIME';
+  String get allTime => '生涯总计';
 
   @override
-  String get allTimeSessions => 'SESSIONS';
+  String get allTimeSessions => '总训练次数';
 
   @override
-  String get allTimeTime => 'TIME';
+  String get allTimeTime => '总训练时长';
 
   @override
-  String get allTimeVolume => 'LIFTED';
+  String get allTimeVolume => '累计总负荷';
 
   @override
-  String get allTimeSets => 'SETS';
+  String get allTimeSets => '累计总组数';
 
   @override
   String allTimeAvg(String time) {
-    return '$time a session on average';
+    return '平均每次训练 $time';
   }
 
   @override
@@ -557,331 +557,305 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String notHere(String gear, String place) {
-    return 'No $gear at $place';
+    return '$place 暂无 $gear';
   }
 
   @override
-  String get notHereWhy => 'Swap it for something you can actually load today.';
+  String get notHereWhy => '替换为当前场地现有的器械进行训练。';
 
   @override
-  String get altHere => 'WHAT YOU CAN DO HERE';
+  String get altHere => '当前场地可用动作';
 
   @override
-  String get places => 'MY PLACES';
+  String get places => '我的训练场地';
 
   @override
-  String get placesShort => 'Places';
+  String get placesShort => '场地';
 
   @override
-  String get placesHint =>
-      'Say what you have in each place and the library only shows what you can actually do there.';
+  String get placesHint => '标记各个场地的可用器械，动作库将智能仅展示该场地支持的动作。';
 
   @override
-  String get placeAll => 'Anywhere';
+  String get placeAll => '所有场地';
 
   @override
-  String get placeNew => 'New place';
+  String get placeNew => '新建场地';
 
   @override
-  String get placeNameLabel => 'NAME';
+  String get placeNameLabel => '场地名称';
 
   @override
-  String get placeNamePlaceholder => 'Home, gym, the park…';
+  String get placeNamePlaceholder => '家庭、健身房、公园……';
 
   @override
-  String get placeGearLabel => 'WHAT IS THERE';
+  String get placeGearLabel => '场地现有器械';
 
   @override
   String placeGearCount(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n kinds of kit',
-      one: '1 kind of kit',
-      zero: 'Nothing ticked',
+      other: '$n 种器械',
+      one: '1 种器械',
+      zero: '未勾选器械',
     );
     return '$_temp0';
   }
 
   @override
   String placeExercises(int n) {
-    return '$n exercises here';
+    return '支持 $n 个动作';
   }
 
   @override
-  String get placeEmptyTitle => 'Train wherever you are';
+  String get placeEmptyTitle => '随时随地，想练就练';
 
   @override
-  String get placeEmptyBody =>
-      'A place is a list of the kit you have there. Pick one to start and edit it later.';
+  String get placeEmptyBody => '场地即器械配置清单。挑选一个预设或创建新场地，后续可随时调整。';
 
   @override
-  String get placeDeleteTitle => 'Delete place';
+  String get placeDeleteTitle => '删除场地';
 
   @override
-  String get placeDeleteBody => 'Only the place goes — your exercises and sessions stay.';
+  String get placeDeleteBody => '仅删除该场地配置，你的所有动作与训练记录均完整保留。';
 
   @override
-  String get placeGym => 'Gym';
+  String get placeGym => '健身房';
 
   @override
-  String get placeHome => 'Home';
+  String get placeHome => '居家';
 
   @override
-  String get placeOutdoors => 'Outdoors';
+  String get placeOutdoors => '户外公园';
 
   @override
-  String get placeFilterLabel => 'PLACE';
+  String get placeFilterLabel => '场地筛选';
 
   @override
-  String get noGearOnly => 'No kit';
+  String get noGearOnly => '仅自重';
 
   @override
   String placeActive(String name) {
-    return 'Training at $name';
+    return '当前在 $name 训练';
   }
 
   @override
-  String get journal => 'JOURNAL';
+  String get journal => '备忘日志';
 
   @override
   String noteCount(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n notes',
-      one: '1 note',
-      zero: 'No notes',
-    );
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n 条备忘', one: '1 条备忘', zero: '暂无备忘');
     return '$_temp0';
   }
 
   @override
-  String get noteKindNote => 'Note';
+  String get noteKindNote => '笔记';
 
   @override
-  String get noteKindPlan => 'Plan';
+  String get noteKindPlan => '计划';
 
   @override
-  String get noteKindDone => 'Win';
+  String get noteKindDone => '突破';
 
   @override
-  String get noteKindPain => 'Niggle';
+  String get noteKindPain => '酸痛';
 
   @override
-  String get noteFilterAll => 'All';
+  String get noteFilterAll => '全部';
 
   @override
-  String get newNote => 'New note';
+  String get newNote => '新建备忘';
 
   @override
-  String get editNote => 'Edit note';
+  String get editNote => '编辑备忘';
 
   @override
-  String get addNote => 'ADD NOTE';
+  String get addNote => '添加备忘';
 
   @override
-  String get noteEmptyTitle => 'Nothing written down yet';
+  String get noteEmptyTitle => '暂无备忘内容';
 
   @override
-  String get noteEmptyBody =>
-      'Cues, plans for next time, how a session felt — with photos or video if you want.';
+  String get noteEmptyBody => '随手记录要领心得、下次训练计划或体感状态，支持附带照片与视频。';
 
   @override
-  String get noteNoneForExercise => 'No notes on this exercise yet.';
+  String get noteNoneForExercise => '该动作暂无备忘记录。';
 
   @override
-  String get noteKindLabel => 'TYPE';
+  String get noteKindLabel => '类别';
 
   @override
-  String get noteTextLabel => 'NOTE';
+  String get noteTextLabel => '内容';
 
   @override
-  String get noteDateLabel => 'DATE';
+  String get noteDateLabel => '日期';
 
   @override
-  String get noteExerciseLabel => 'EXERCISE';
+  String get noteExerciseLabel => '关联动作';
 
   @override
-  String get noteMediaLabel => 'PHOTOS & VIDEO';
+  String get noteMediaLabel => '照片与视频';
 
   @override
-  String get noteGeneral => 'No exercise';
+  String get noteGeneral => '通用备忘（无关特定动作）';
 
   @override
-  String get noteAttach => 'Attach';
+  String get noteAttach => '添加附件';
 
   @override
-  String get noteRemoveMedia => 'Remove attachment';
+  String get noteRemoveMedia => '移除附件';
 
   @override
-  String get deleteNoteTitle => 'Delete note';
+  String get deleteNoteTitle => '删除备忘';
 
   @override
-  String get deleteNoteBody => 'The note and anything attached to it go for good.';
+  String get deleteNoteBody => '该条备忘及其关联附件将被永久删除。';
 
   @override
-  String get noteToday => 'Today';
+  String get noteToday => '今天';
 
   @override
-  String get noteYesterday => 'Yesterday';
+  String get noteYesterday => '昨天';
 
   @override
-  String get noteAllNotes => 'All notes';
+  String get noteAllNotes => '全部备忘';
 
   @override
-  String get noteCalendar => 'Calendar';
+  String get noteCalendar => '日历视图';
 
   @override
-  String get noteNoneOnDay => 'Nothing written on this day';
+  String get noteNoneOnDay => '当日暂无备忘';
 
   @override
-  String get noteAddOnDay => 'Note on this day';
+  String get noteAddOnDay => '在此日期添加备忘';
 
   @override
-  String get notePrevMonth => 'Previous month';
+  String get notePrevMonth => '上个月';
 
   @override
-  String get noteNextMonth => 'Next month';
+  String get noteNextMonth => '下个月';
 
   @override
   String noteMonthCount(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n notes this month',
-      one: '1 note this month',
-      zero: 'No notes this month',
+      other: '本月 $n 条备忘',
+      one: '本月 1 条备忘',
+      zero: '本月暂无备忘',
     );
     return '$_temp0';
   }
 
   @override
-  String get measures => 'MEASUREMENTS';
+  String get measures => '身体围度';
 
   @override
-  String get measuresHint => 'Neck to calf — watch your body change, not just the bar.';
+  String get measuresHint => '从颈围到小腿围，见证肉眼可见的身材蜕变，不仅关注杠铃重量。';
 
   @override
   String measureCount(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n readings',
-      one: '1 reading',
-      zero: 'Nothing logged',
-    );
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n 次记录', one: '1 次记录', zero: '暂无记录');
     return '$_temp0';
   }
 
   @override
-  String get measureNoneYet => 'Not logged yet';
+  String get measureNoneYet => '暂无记录';
 
   @override
-  String get measureHistory => 'HISTORY';
+  String get measureHistory => '历史趋势';
 
   @override
-  String get measureNeck => 'Neck';
+  String get measureNeck => '颈围';
 
   @override
-  String get measureShoulders => 'Shoulders';
+  String get measureShoulders => '肩宽';
 
   @override
-  String get measureChest => 'Chest';
+  String get measureChest => '胸围';
 
   @override
-  String get measureArm => 'Arm';
+  String get measureArm => '臂围';
 
   @override
-  String get measureForearm => 'Forearm';
+  String get measureForearm => '前臂围';
 
   @override
-  String get measureWaist => 'Waist';
+  String get measureWaist => '腰围';
 
   @override
-  String get measureHips => 'Hips';
+  String get measureHips => '臀围';
 
   @override
-  String get measureThigh => 'Thigh';
+  String get measureThigh => '大腿围';
 
   @override
-  String get measureCalf => 'Calf';
+  String get measureCalf => '小腿围';
 
   @override
-  String get measureBodyfat => 'Body fat';
+  String get measureBodyfat => '体脂率';
 
   @override
-  String get timeline => 'TIMELINE';
+  String get timeline => '身材蜕变相册';
 
   @override
-  String get timelineHint => 'Same pose, same spot, same light. In a year you will not believe it.';
+  String get timelineHint => '同姿态、同机位、同光线。坚持一年，震撼由心而生。';
 
   @override
-  String get timelineEmptyTitle => 'Your first photo starts the clock';
+  String get timelineEmptyTitle => '拍下第一张身材照，开启蜕变之旅';
 
   @override
   String photoCount(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n photos',
-      one: '1 photo',
-      zero: 'No photos',
-    );
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n 张照片', one: '1 张照片', zero: '暂无照片');
     return '$_temp0';
   }
 
   @override
-  String get poseFront => 'Front';
+  String get poseFront => '正面';
 
   @override
-  String get poseSide => 'Side';
+  String get poseSide => '侧面';
 
   @override
-  String get poseBack => 'Back';
+  String get poseBack => '背面';
 
   @override
-  String get photoEvery => 'REMIND ME';
+  String get photoEvery => '拍照提醒';
 
   @override
   String photoEveryDays(int n) {
-    return 'Every $n days';
+    return '每 $n 天提醒';
   }
 
   @override
-  String get photoEveryOff => 'Never';
+  String get photoEveryOff => '从不提醒';
 
   @override
   String photoNextIn(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: 'Next photo in $n days',
-      one: 'Next photo tomorrow',
-    );
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n 天后拍摄身材照', one: '明天该拍照啦');
     return '$_temp0';
   }
 
   @override
-  String get photoDueNow => 'Photo due — grab it today';
+  String get photoDueNow => '今天到了拍照打卡日，拍一张吧';
 
   @override
-  String get addTodayPhotos => 'ADD TODAY\'S PHOTOS';
+  String get addTodayPhotos => '记录今日身材照';
 
   @override
   String posePhoto(String pose) {
-    return '$pose photo';
+    return '$pose身材照';
   }
 
   @override
-  String get compare => 'COMPARE';
+  String get compare => '身材对比';
 
   @override
-  String get compareNeedTwo => 'Shoot the same pose on two different days and you can compare them here.';
+  String get compareNeedTwo => '在不同日期拍摄同一姿态的照片，即可在此左右同屏对比蜕变。';
 
   @override
   String dayNumber(int n) {
-    return 'Day $n';
+    return '第 $n 天';
   }
 
   @override
@@ -889,138 +863,131 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: '$n days apart',
-      one: '1 day apart',
-      zero: 'Same day',
+      other: '间隔 $n 天',
+      one: '间隔 1 天',
+      zero: '同一天',
     );
     return '$_temp0';
   }
 
   @override
-  String get deleteEntryTitle => 'Delete this day';
+  String get deleteEntryTitle => '删除该日记录';
 
   @override
-  String get deleteDayBody => 'Its photos go with it, for good.';
+  String get deleteDayBody => '当日拍摄的所有身材照都将被永久删除。';
 
   @override
-  String get timelinePhotos => 'Photos';
+  String get timelinePhotos => '身材照片';
 
   @override
-  String get timelineBody => 'Muscle map';
+  String get timelineBody => '肌群热力图';
 
   @override
-  String get timelineBodyEmpty =>
-      'Log a session and your muscle map starts filling in here, no photos needed.';
+  String get timelineBodyEmpty => '记录训练后，肌群激活热力图将在此自动点亮，无需拍照。';
 
   @override
-  String get timelineBodyHint => 'Built from your own sets — nothing to upload.';
+  String get timelineBodyHint => '由你的真实训练组数自动绘制，无需上传任何数据。';
 
   @override
   String timelineWindow(String from, String to) {
-    return '$from – $to';
+    return '$from 至 $to';
   }
 
   @override
   String sessionCount(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n sessions',
-      one: '1 session',
-      zero: 'No sessions',
-    );
+    String _temp0 = intl.Intl.pluralLogic(n, locale: localeName, other: '$n 次训练', one: '1 次训练', zero: '暂无训练');
     return '$_temp0';
   }
 
   @override
-  String get notifPhotoChannel => 'Progress photos';
+  String get notifPhotoChannel => '身材打卡提醒';
 
   @override
-  String get notifPhotoChannelWhy => 'A nudge when your next progress photo is due.';
+  String get notifPhotoChannelWhy => '在身材照拍摄日发送轻提醒。';
 
   @override
-  String get notifPhotoTitle => 'Time for your progress photo';
+  String get notifPhotoTitle => '该拍身材蜕变照啦';
 
   @override
   String notifPhotoBody(int n) {
-    return '$n days since the last one. Same pose, same light.';
+    return '距离上次拍照已有 $n 天。保持同姿态、同光线打卡一张吧！';
   }
 
   @override
-  String get share => 'SHARE';
+  String get share => '分享卡片';
 
   @override
-  String get sharePick => 'What do you want to show?';
+  String get sharePick => '你想展示什么？';
 
   @override
-  String get shareSession => 'Last session';
+  String get shareSession => '本次训练结算';
 
   @override
-  String get shareStreak => 'Streak and consistency';
+  String get shareStreak => '连击天数与打卡规律';
 
   @override
-  String get shareBody => 'Muscles worked';
+  String get shareBody => '今日轰炸肌群';
 
   @override
-  String get shareCompare => 'Before and after';
+  String get shareCompare => '前后身材蜕变对比';
 
   @override
-  String get shareHint => 'The card is built on your phone. Nothing leaves until you pick where it goes.';
+  String get shareHint => '卡片完全在手机本地生成。未经你的选择，任何内容绝不会外发。';
 
   @override
-  String get shareFailed => 'The card could not be built';
+  String get shareFailed => '卡片生成失败';
 
   @override
-  String get shareWeekOf => 'LAST 7 DAYS';
+  String get shareWeekOf => '近 7 天';
 
   @override
-  String get shareStreakLabel => 'DAY STREAK';
+  String get shareStreakLabel => '连续训练天数';
 
   @override
-  String get shareSessionsLabel => 'SESSIONS';
+  String get shareSessionsLabel => '训练次数';
 
   @override
-  String get shareVolumeLabel => 'VOLUME';
+  String get shareVolumeLabel => '总负荷';
 
   @override
-  String get shareSetsLabel => 'SETS';
+  String get shareSetsLabel => '总组数';
 
   @override
-  String get shareNothing => 'Log a session first — there is nothing to show yet';
+  String get shareNothing => '请先完成一次训练，暂无数据可供展示';
 
   @override
-  String get restForExercise => 'REST FOR THIS EXERCISE';
+  String get restForExercise => '该动作专属间歇时间';
 
   @override
-  String get restUsingDefault => 'Using your default';
+  String get restUsingDefault => '跟随全局默认时间';
 
   @override
-  String get restCustom => 'Only for this one';
+  String get restCustom => '仅该动作自定义';
 
   @override
-  String get setType => 'SET TYPE';
+  String get setType => '组别类型';
 
   @override
-  String get setTypeNormal => 'Working';
+  String get setTypeNormal => '正式组';
 
   @override
-  String get setTypeWarmup => 'Warm-up';
+  String get setTypeWarmup => '热身组';
 
   @override
-  String get setTypeDrop => 'Drop set';
+  String get setTypeDrop => '递减组';
 
   @override
-  String get setTypeFailure => 'To failure';
+  String get setTypeFailure => '力竭组';
 
   @override
-  String get setTypeHint => 'Warm-ups stay out of your volume and your records.';
+  String get setTypeHint => '热身组不会计入正式容量与个人纪录（PR）。';
 
   @override
-  String get addWarmup => 'WARM-UP';
+  String get addWarmup => '添加热身组';
 
   @override
   String platesPerSide(String plates) {
-    return 'Per side: $plates';
+    return '单边挂片: $plates';
   }
 
   @override
@@ -1303,13 +1270,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sexLabel => '生理性别';
 
   @override
-  String get macroProtein => 'PROTEIN';
+  String get macroProtein => '蛋白质';
 
   @override
-  String get macroCarbs => 'CARBS';
+  String get macroCarbs => '碳水';
 
   @override
-  String get macroFat => 'FAT';
+  String get macroFat => '脂肪';
 
   @override
   String get male => '男';
@@ -1411,10 +1378,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get toolNameRm => '1RM';
+  String get toolNameRm => '极限重量 (1RM)';
 
   @override
-  String get toolNameBmi => 'BMI';
+  String get toolNameBmi => 'BMI 指数';
 
   @override
   String get toolNameCal => '卡路里';
@@ -1731,50 +1698,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get skip2 => '跳过';
 
   @override
-  String get madeWithLoveBy => 'MADE WITH LOVE BY';
+  String get madeWithLoveBy => '用心制作';
 
   @override
-  String get sourceCode => 'SOURCE CODE';
+  String get sourceCode => '开源代码';
 
   @override
-  String get suggested => 'SUGGESTED';
+  String get suggested => '推荐动作';
 
   @override
-  String get results => 'RESULTS';
+  String get results => '搜索结果';
 
   @override
-  String get noMatches => 'No exercise matches that search.';
+  String get noMatches => '未找到匹配该关键词的动作。';
 
   @override
-  String get tapToEdit => 'Tap the pencil to fix an entry, or the bin to remove it.';
+  String get tapToEdit => '点击铅笔修改记录，点击垃圾桶删除。';
 
   @override
-  String get editEntry => 'Edit';
+  String get editEntry => '编辑记录';
 
   @override
-  String get editEntryHint => 'Fix the reps or the weight of any set.';
+  String get editEntryHint => '调整任意组的次数或负重重量。';
 
   @override
-  String get removeSet => 'Remove set';
+  String get removeSet => '删除此组';
 
   @override
-  String get continueWorkout => 'CONTINUE';
+  String get continueWorkout => '继续本次训练';
 
   @override
-  String get continueWorkoutBody =>
-      'The workout goes back to being in progress, with its sets already ticked. Finishing it again saves it on its original day.';
+  String get continueWorkoutBody => '恢复为进行中的训练状态，已完成组保持勾选。再次完成时将覆盖保存在原训练日期。';
 
   @override
-  String get addBodyWidget => 'Add muscle map widget';
+  String get addBodyWidget => '添加肌群桌面小组件';
 
   @override
-  String get repsOnly => 'Reps only';
+  String get repsOnly => '仅记次数';
 
   @override
-  String get repsOnlyHint => 'Log this exercise without weight.';
+  String get repsOnlyHint => '纯自重动作，记录时无需输入重量。';
 
   @override
-  String get useDefaultArt => 'Back to the default art';
+  String get useDefaultArt => '恢复为默认动作图';
 
   @override
   String daysShort(int n) {
