@@ -796,7 +796,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get measureBodyfat => '体脂率';
 
   @override
-  String get timeline => '身材蜕变相册';
+  String get timeline => '身材相册';
 
   @override
   String get timelineHint => '同姿态、同机位、同光线。坚持一年，震撼由心而生。';
@@ -851,7 +851,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get compare => '身材对比';
 
   @override
-  String get compareNeedTwo => '在不同日期拍摄同一姿态的照片，即可在此左右同屏对比蜕变。';
+  String get compareNeedTwo => '在不同日期拍摄同一姿态的照片，即可在此左右同屏对比。';
 
   @override
   String dayNumber(int n) {
@@ -883,7 +883,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get timelineBody => '肌群热力图';
 
   @override
-  String get timelineBodyEmpty => '记录训练后，肌群激活热力图将在此自动点亮，无需拍照。';
+  String get timelineBodyEmpty => '记录训练后，肌群热力图将在此自动点亮，无需拍照。';
 
   @override
   String get timelineBodyHint => '由你的真实训练组数自动绘制，无需上传任何数据。';
@@ -903,10 +903,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notifPhotoChannel => '身材打卡提醒';
 
   @override
-  String get notifPhotoChannelWhy => '在身材照拍摄日发送轻提醒。';
+  String get notifPhotoChannelWhy => '在身材照拍摄日发送提醒。';
 
   @override
-  String get notifPhotoTitle => '该拍身材蜕变照啦';
+  String get notifPhotoTitle => '该拍身材照啦';
 
   @override
   String notifPhotoBody(int n) {
@@ -914,25 +914,25 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get share => '分享卡片';
+  String get share => '分享';
 
   @override
-  String get sharePick => '你想展示什么？';
+  String get sharePick => '你想分享什么？';
 
   @override
   String get shareSession => '本次训练结算';
 
   @override
-  String get shareStreak => '连击天数与打卡规律';
+  String get shareStreak => '训练日历';
 
   @override
-  String get shareBody => '今日轰炸肌群';
+  String get shareBody => '训练肌群';
 
   @override
-  String get shareCompare => '前后身材蜕变对比';
+  String get shareCompare => '前后身材对比';
 
   @override
-  String get shareHint => '卡片完全在手机本地生成。未经你的选择，任何内容绝不会外发。';
+  String get shareHint => '卡片本地生成。未经允许，不会外传。';
 
   @override
   String get shareFailed => '卡片生成失败';
@@ -1578,13 +1578,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get freeForever => '永久免费';
 
   @override
-  String get freeForeverWhy => '无订阅、无广告、没有任何付费墙功能阻碍。';
+  String get freeForeverWhy => '无订阅、无广告、无付费功能。';
 
   @override
   String get fullyOffline => '完全离线';
 
   @override
-  String get fullyOfflineWhy => '无账号、无服务器。你的训练数据绝不离开这台手机。';
+  String get fullyOfflineWhy => '无账号、无服务器。';
 
   @override
   String get yoursToTake => '数据归你所有';
@@ -1607,7 +1607,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get calculatorsInside => '6 款实用计算器';
 
   @override
-  String get calculatorsInsideWhy => '涵盖 1RM、杠铃片、BMI、热量、体脂率和热身推算 — 均基于公开发表的科学公式。';
+  String get calculatorsInsideWhy => '涵盖 1RM、杠铃片、BMI、热量、体脂率和热身推算。';
 
   @override
   String get mathInside => '真实可信的数据';
