@@ -42,7 +42,7 @@ e guarda come si muovono i tuoi numeri.
 <br/>
 <br/>
 
-<sub><a href="README.md">English</a> · <a href="README.es.md">Español</a> · <b>Italiano</b></sub>
+<sub><a href="README.md">English</a> · <a href="README.es.md">Español</a> · <b>Italiano</b> · <a href="README.zh.md">简体中文</a></sub>
 
 </div>
 
@@ -172,7 +172,7 @@ decorazioni.
 - Ogni foto, video e nota resta nello spazio privato dell'app
 - Elimina tutto con un tocco
 - Temi chiaro e scuro, kg o lb
-- Inglese, spagnolo e italiano, e una nuova lingua è solo una pull request
+- Inglese, spagnolo, italiano e cinese semplificato, e una nuova lingua è solo una pull request
 
 </td>
 </tr>
