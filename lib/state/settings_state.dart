@@ -9,7 +9,7 @@ mixin SettingsState on FitCore, ToolsState {
 
   String? get alarmSoundPath => AlarmStore.pathFor(alarmSound);
 
-  String bgPattern = 'none';
+  String bgPattern = 'dots';
   bool onboarded = false;
   bool alarmAllowed = true;
   int? alarmAskedAt;
@@ -115,6 +115,20 @@ mixin SettingsState on FitCore, ToolsState {
     notifyListeners();
   }
 
+  int restFor(String exerciseId) => exerciseRest[exerciseId] ?? restSeconds;
+
+  bool hasCustomRest(String exerciseId) => exerciseRest.containsKey(exerciseId);
+
+  void setExerciseRest(String exerciseId, int? seconds) {
+    if (seconds == null) {
+      exerciseRest.remove(exerciseId);
+    } else {
+      exerciseRest[exerciseId] = seconds.clamp(15, 600);
+    }
+    _persist();
+    notifyListeners();
+  }
+
   void setAlarmSound(String basename, String displayName) {
     alarmSound = basename;
     alarmSoundName = displayName;
@@ -139,8 +153,6 @@ mixin SettingsState on FitCore, ToolsState {
     notifyListeners();
   }
 
-  /// Si dice que no, no se insiste en el momento: se vuelve a preguntar en
-  /// otra sesión, pasados unos días. Mientras tanto se avisa en Ajustes.
   static const _askAgainAfter = Duration(days: 3);
 
   Future<void> refreshAlarmPermission() async {

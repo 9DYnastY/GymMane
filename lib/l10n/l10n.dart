@@ -4,12 +4,13 @@ import 'package:intl/intl.dart';
 
 import 'app_localizations.dart';
 import 'catalog_es.dart';
+import 'catalog_it.dart';
 import 'catalog_zh.dart';
 
 export 'app_localizations.dart';
 
-const Map<String, Map<String, String>> _catalogNames = {'es': kExerciseNameEs, 'zh': kExerciseNameZh};
-const Map<String, Map<String, List<String>>> _catalogSteps = {'es': kExerciseStepsEs, 'zh': kExerciseStepsZh};
+const Map<String, Map<String, String>> _catalogNames = {'es': kExerciseNameEs, 'it': kExerciseNameIt, 'zh': kExerciseNameZh};
+const Map<String, Map<String, List<String>>> _catalogSteps = {'es': kExerciseStepsEs, 'it': kExerciseStepsIt, 'zh': kExerciseStepsZh};
 
 String appLanguage = 'en';
 AppLocalizations t = lookupAppLocalizations(const Locale('en'));
@@ -165,7 +166,6 @@ extension GymL10n on AppLocalizations {
         'es' => '¿Eliminar toda la sesión? Esta acción no se puede deshacer.',
         _ => 'Delete this entire session? This cannot be undone.',
       };
-
   String bmiCategory(String key) => switch (key) {
         'Underweight' => bmiUnderweight,
         'Normal' => bmiNormal,
@@ -195,6 +195,33 @@ extension GymL10n on AppLocalizations {
         'glutes' => muscleGlutes,
         'calves' => muscleCalves,
         _ => id,
+      };
+
+  String poseName(String pose) => switch (pose) {
+        'front' => poseFront,
+        'side' => poseSide,
+        _ => poseBack,
+      };
+
+  String placePresetName(String preset) => switch (preset) {
+        'gym' => placeGym,
+        'home' => placeHome,
+        _ => placeOutdoors,
+      };
+
+  String photoInterval(int days) => days <= 0 ? photoEveryOff : photoEveryDays(days);
+
+  String measureName(String key) => switch (key) {
+        'neck' => measureNeck,
+        'shoulders' => measureShoulders,
+        'chest' => measureChest,
+        'arm' => measureArm,
+        'forearm' => measureForearm,
+        'waist' => measureWaist,
+        'hips' => measureHips,
+        'thigh' => measureThigh,
+        'calf' => measureCalf,
+        _ => measureBodyfat,
       };
 
   String muscleGroupName(String key) => switch (key) {
@@ -230,6 +257,13 @@ extension GymL10n on AppLocalizations {
 
   String weekdayInitial(int w) =>
       _dates((l) => DateFormat('', l)).dateSymbols.NARROWWEEKDAYS[w % 7];
+
+  int get firstWeekday =>
+      _dates((l) => DateFormat('', l)).dateSymbols.FIRSTDAYOFWEEK + 1;
+
+  String monthYear(DateTime d) => _capitalize(_dates(DateFormat.yMMMM).format(d));
+
+  String fullDate(DateTime d) => '${weekday(d.weekday)}, ${shortDateYear(d)}';
 
   String longDate(DateTime d) => '${weekday(d.weekday)}, ${shortDate(d)}';
 

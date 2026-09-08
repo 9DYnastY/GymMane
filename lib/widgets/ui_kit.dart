@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
@@ -38,6 +40,143 @@ class SoftCard extends StatelessWidget {
   }
 }
 
+class SearchField extends StatelessWidget {
+  const SearchField({
+    super.key,
+    required this.controller,
+    required this.hint,
+    required this.onChanged,
+    this.color,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final ValueChanged<String> onChanged;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final gc = context.gc;
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: color ?? gc.bgRaised,
+        border: Border.all(color: gc.border),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(children: [
+        SvgPathIcon(Ic.search, size: 16, color: gc.textSecondary),
+        const SizedBox(width: 10),
+        Expanded(
+          child: TextField(
+            controller: controller,
+            onChanged: onChanged,
+            style: AppTheme.s(14, color: gc.text),
+            cursorColor: gc.accent,
+            decoration: InputDecoration(
+              isCollapsed: true,
+              border: InputBorder.none,
+              hintText: hint,
+              hintStyle: AppTheme.s(14, color: gc.textSecondary),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class GhostButton extends StatelessWidget {
+  const GhostButton({super.key, required this.label, required this.icon, required this.onTap});
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final gc = context.gc;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        height: 46,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          border: Border.all(color: gc.border),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: gc.ember),
+            const SizedBox(width: 8),
+            Text(label, style: AppTheme.d(13, weight: FontWeight.w600, color: gc.text, letterSpacing: 1)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SheetHandle extends StatelessWidget {
+  const SheetHandle({super.key, this.color, this.margin});
+
+  final Color? color;
+  final EdgeInsets? margin;
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Container(
+          width: 40,
+          height: 4,
+          margin: margin,
+          decoration: BoxDecoration(
+            color: color ?? context.gc.bgRaised2,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      );
+}
+
+class RoundAction extends StatelessWidget {
+  const RoundAction({
+    super.key,
+    required this.child,
+    required this.onTap,
+    this.label,
+    this.size = 36,
+    this.filled = false,
+  });
+
+  final Widget child;
+  final VoidCallback onTap;
+  final String? label;
+  final double size;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final gc = context.gc;
+    final button = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: filled ? gc.ember : gc.bgRaised,
+          shape: BoxShape.circle,
+          border: Border.all(color: filled ? gc.ember : gc.border),
+        ),
+        child: Center(child: child),
+      ),
+    );
+    return label == null ? button : Semantics(button: true, label: label, child: button);
+  }
+}
+
 class RoundBtn extends StatelessWidget {
   const RoundBtn({super.key, required this.icon, required this.onTap, this.iconColor});
   final List<IconPath> icon;
@@ -45,20 +184,51 @@ class RoundBtn extends StatelessWidget {
   final Color? iconColor;
 
   @override
+  Widget build(BuildContext context) => RoundAction(
+        onTap: onTap,
+        child: SvgPathIcon(icon, size: 16, color: iconColor ?? context.gc.text),
+      );
+}
+
+class ScreenHeader extends StatelessWidget {
+  const ScreenHeader({
+    super.key,
+    required this.title,
+    required this.onBack,
+    this.subtitle,
+    this.titleSize = 20,
+    this.titleSpacing = 2,
+    this.actions = const [],
+  });
+
+  final String title;
+  final VoidCallback onBack;
+  final String? subtitle;
+  final double titleSize;
+  final double titleSpacing;
+  final List<Widget> actions;
+
+  @override
   Widget build(BuildContext context) {
     final gc = context.gc;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: gc.bgRaised,
-          shape: BoxShape.circle,
-          border: Border.all(color: gc.border),
+    return Row(
+      children: [
+        RoundBtn(icon: Ic.chevronLeft, onTap: onBack),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ScreenTitle(title, size: titleSize, spacing: titleSpacing),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(subtitle!, style: AppTheme.s(12.5, color: gc.textSecondary)),
+              ],
+            ],
+          ),
         ),
-        child: Center(child: SvgPathIcon(icon, size: 16, color: iconColor ?? gc.text)),
-      ),
+        ...actions,
+      ],
     );
   }
 }
@@ -206,6 +376,50 @@ class SegToggle extends StatelessWidget {
   }
 }
 
+class DashedRail extends StatelessWidget {
+  const DashedRail({super.key, required this.color, this.dash = 4, this.gap = 5, this.thickness = 1.6});
+
+  final Color color;
+  final double dash;
+  final double gap;
+  final double thickness;
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: SizedBox(
+          width: thickness,
+          child: CustomPaint(
+            size: Size.infinite,
+            painter: _DashPainter(color, dash, gap, thickness),
+          ),
+        ),
+      );
+}
+
+class _DashPainter extends CustomPainter {
+  _DashPainter(this.color, this.dash, this.gap, this.thickness);
+  final Color color;
+  final double dash, gap, thickness;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = color
+      ..strokeWidth = thickness
+      ..strokeCap = StrokeCap.round;
+    for (double y = 0; y < size.height; y += dash + gap) {
+      canvas.drawLine(
+        Offset(size.width / 2, y),
+        Offset(size.width / 2, math.min(y + dash, size.height)),
+        p,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashPainter o) => o.color != color || o.dash != dash || o.gap != gap;
+}
+
 class Pill extends StatelessWidget {
   const Pill({
     super.key,
@@ -265,11 +479,19 @@ class PrimaryButton extends StatelessWidget {
         width: double.infinity,
         height: height,
         decoration: BoxDecoration(color: bg ?? gc.ember, borderRadius: BorderRadius.circular(100)),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[SvgPathIcon(icon!, size: 18, color: f), const SizedBox(width: 10)],
-            Text(label, style: AppTheme.d(16, weight: FontWeight.w600, color: f, letterSpacing: 2)),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(label,
+                    maxLines: 1,
+                    style: AppTheme.d(16, weight: FontWeight.w600, color: f, letterSpacing: 2)),
+              ),
+            ),
           ],
         ),
       ),

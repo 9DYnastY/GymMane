@@ -1,6 +1,6 @@
 part of 'fit_state.dart';
 
-mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, RoutinesState {
+mixin WorkoutState on FitCore, SettingsState, LibraryState, PlacesState, StatsState, RoutinesState {
   final List<String> selectedMuscles = [];
   final Set<String> sessionPicks = {};
   String trainStep = 'select';
@@ -12,9 +12,8 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   bool sessionPaused = false;
 
   void startWorkout([List<String>? muscles]) {
-    if (route != 'train') prevRoute = route;
-    route = 'train';
     trainStep = 'select';
+    pushRoute('train');
     if (muscles != null) {
       selectedMuscles
         ..clear()
@@ -30,6 +29,7 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     if (sel.isEmpty) return const [];
     return allExercises
         .where((ex) => sel.contains(ex.primary) || ex.secondary.any(sel.contains))
+        .where(fitsHere)
         .toList();
   }
 
@@ -59,12 +59,8 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   }
 
   List<Exercise> trainSearchResults(String query) {
-    final q = query.trim().toLowerCase();
-    if (q.isEmpty) return const [];
-    return allExercises
-        .where((e) => exerciseName(e).toLowerCase().contains(q) || e.name.toLowerCase().contains(q))
-        .take(40)
-        .toList();
+    if (query.trim().isEmpty) return const [];
+    return allExercises.where(exerciseSearch(query)).take(40).toList();
   }
 
   static const _pickTarget = 6;
@@ -128,11 +124,10 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   }
 
   void closeTrain() {
-    route = prevRoute;
     trainStep = 'select';
     selectedMuscles.clear();
     sessionPicks.clear();
-    notifyListeners();
+    popRoute();
   }
 
   void startRoutine(Routine r) {
@@ -146,13 +141,20 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     if (exs.isNotEmpty) _beginSession(exs);
   }
 
+  List<SessionSet> _openingSets(String id) {
+    final last = lastSetsFor(id);
+    if (last.isNotEmpty) return last.map((l) => SessionSet(l.reps, l.weight, false, kind: l.kind)).toList();
+    final w = isRepsOnly(id) ? 0.0 : 20.0;
+    return [SessionSet(10, w, false), SessionSet(10, w, false), SessionSet(10, w, false)];
+  }
+
   void startFromLoggedSession(LoggedSession ls) {
     if (ls.exercises.isEmpty) return;
     final s = WorkoutSession();
     s.exercises = ls.exercises.map((le) {
       final sets = le.sets.isNotEmpty
-          ? le.sets.map((l) => SessionSet(l.reps, l.weight, false)).toList()
-          : [SessionSet(10, 20, false), SessionSet(10, 20, false), SessionSet(10, 20, false)];
+          ? le.sets.map((l) => SessionSet(l.reps, l.weight, false, kind: l.kind)).toList()
+          : _openingSets(le.id);
       return SessionExercise(le.id, le.name, le.primary, sets);
     }).toList();
     _restTimer?.cancel();
@@ -160,20 +162,16 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     sessionPaused = false;
     _startTicking();
     session = s;
-    route = 'session';
+    pushRoute('session');
     persistNow();
     notifyListeners();
   }
 
   void _beginSession(List<Exercise> exs) {
     final s = WorkoutSession();
-    s.exercises = exs.map((ex) {
-      final last = lastSetsFor(ex.id);
-      final sets = last.isNotEmpty
-          ? last.map((l) => SessionSet(l.reps, l.weight, false)).toList()
-          : [SessionSet(10, 20, false), SessionSet(10, 20, false), SessionSet(10, 20, false)];
-      return SessionExercise(ex.id, ex.name, ex.primary, sets);
-    }).toList();
+    s.exercises = exs
+        .map((ex) => SessionExercise(ex.id, ex.name, ex.primary, _openingSets(ex.id)))
+        .toList();
     _restTimer?.cancel();
     _elapsedBefore = 0;
     sessionPaused = false;
@@ -245,9 +243,12 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     if (sessionPaused) return;
     _restTimer?.cancel();
     RestAlarm.instance.stopSound();
-    session!.restRemaining = restSeconds;
+    final seconds = restFor(session!.exercises.isEmpty
+        ? ''
+        : session!.exercises[session!.currentIndex.clamp(0, session!.exercises.length - 1)].id);
+    session!.restRemaining = seconds;
 
-    RestAlarm.instance.schedule(Duration(seconds: restSeconds));
+    RestAlarm.instance.schedule(Duration(seconds: seconds));
     askAlarmPermission();
     notifyListeners();
     _restTimer = Timer.periodic(const Duration(seconds: 1), (t) {
@@ -287,7 +288,7 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   void addSet(int exIdx) {
     final sets = session!.exercises[exIdx].sets;
     final last = sets.isNotEmpty ? sets.last : SessionSet(10, 20, false);
-    sets.add(SessionSet(last.reps, last.weight, false));
+    sets.add(SessionSet(last.reps, last.weight, false, kind: last.kind));
     _persist();
     notifyListeners();
   }
@@ -299,6 +300,47 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     final current = toDisplayWeight(session!.exercises[exIdx].sets[setIdx].weight);
     final next = _roundTo(current, weightStep) + dir * weightStep;
     setSessionWeight(exIdx, setIdx, fromDisplayWeight(math.max(0, next)));
+  }
+
+  static const _warmupSpec = [(0.4, 10), (0.6, 5), (0.8, 3)];
+
+  bool hasWarmup(int exIdx) {
+    final s = session;
+    if (s == null || exIdx >= s.exercises.length) return false;
+    return s.exercises[exIdx].sets.any((st) => st.kind == SetKind.warmup);
+  }
+
+  void addWarmupSets(int exIdx) {
+    final s = session;
+    if (s == null || exIdx >= s.exercises.length) return;
+    final sets = s.exercises[exIdx].sets;
+    if (sets.isEmpty || hasWarmup(exIdx)) return;
+
+    final target = sets.map((st) => st.weight).reduce(math.max);
+    if (target <= 0) return;
+
+    final warm = [
+      for (final spec in _warmupSpec)
+        SessionSet(
+          spec.$2,
+          fromDisplayWeight(_roundTo(toDisplayWeight(target * spec.$1), weightStep)),
+          false,
+          kind: SetKind.warmup,
+        ),
+    ];
+    sets.insertAll(0, warm);
+    _persist();
+    notifyListeners();
+  }
+
+  void setSetKind(int exIdx, int setIdx, SetKind kind) {
+    final s = session;
+    if (s == null || exIdx >= s.exercises.length) return;
+    final sets = s.exercises[exIdx].sets;
+    if (setIdx >= sets.length) return;
+    sets[setIdx].kind = kind;
+    _persist();
+    notifyListeners();
   }
 
   void setSessionReps(int exIdx, int setIdx, int reps) {
@@ -340,19 +382,33 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
       notifyListeners();
       return;
     }
-    final last = lastSetsFor(id);
-    s.exercises.add(SessionExercise(
-      ex.id,
-      ex.name,
-      ex.primary,
-      last.isNotEmpty
-          ? last.map((l) => SessionSet(l.reps, l.weight, false)).toList()
-          : [SessionSet(10, 20, false), SessionSet(10, 20, false), SessionSet(10, 20, false)],
-    ));
+    s.exercises.add(SessionExercise(ex.id, ex.name, ex.primary, _openingSets(id)));
     s.currentIndex = s.exercises.length - 1;
     persistNow();
     notifyListeners();
   }
+
+  List<Exercise> sessionSuggestions() {
+    final inSession = session?.exercises.map((e) => e.id).toSet() ?? <String>{};
+    final ids = <String>[];
+    for (final e in allExercises) {
+      if (favorites[e.id] == true && !inSession.contains(e.id)) ids.add(e.id);
+    }
+    for (final s in sessions.reversed) {
+      for (final e in s.exercises) {
+        if (!inSession.contains(e.id) && !ids.contains(e.id)) ids.add(e.id);
+      }
+      if (ids.length >= 12) break;
+    }
+    final out = <Exercise>[];
+    for (final id in ids.take(12)) {
+      final ex = exerciseById(id);
+      if (ex != null) out.add(ex);
+    }
+    return out;
+  }
+
+  bool inSession(String id) => session?.exercises.any((e) => e.id == id) ?? false;
 
   void nextExercise() {
     final s = session!;
@@ -374,13 +430,16 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     RestAlarm.instance.cancel();
     final s = session!;
     final done = <SessionSet>[];
+    final working = <SessionSet>[];
     for (final e in s.exercises) {
       for (final st in e.sets) {
-        if (st.done) done.add(st);
+        if (!st.done) continue;
+        done.add(st);
+        if (st.counts) working.add(st);
       }
     }
-    s.summaryVolume = done.fold<double>(0, (sum, st) => sum + st.reps * st.weight).round();
-    s.summarySets = done.length;
+    s.summaryVolume = working.fold<double>(0, (sum, st) => sum + st.reps * st.weight).round();
+    s.summarySets = working.length;
     s.summaryDuration = sessionElapsed;
     s.complete = true;
     s.restRemaining = null;
@@ -388,12 +447,16 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     if (done.isNotEmpty) {
       final logged = <LoggedExercise>[];
       for (final e in s.exercises) {
-        final doneSets = e.sets.where((st) => st.done).map((st) => LoggedSet(st.reps, st.weight)).toList();
+        final doneSets = e.sets
+            .where((st) => st.done)
+            .map((st) => LoggedSet(st.reps, st.weight, kind: st.kind))
+            .toList();
         if (doneSets.isNotEmpty) {
           logged.add(LoggedExercise(e.id, e.name, e.primary, doneSets));
         }
       }
-      final now = DateTime.now();
+      _computeSummaryHighlights(logged);
+      final now = s.loggedAt ?? DateTime.now();
       final k = _dayKey(now);
       final existingIndex = sessions.indexWhere((s) => _dayKey(s.date) == k);
       final LoggedSession target;
@@ -405,7 +468,6 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
         sessions.add(target);
       }
       sessions.sort((a, b) => a.date.compareTo(b.date));
-      _computeSummaryHighlights(logged, target);
     } else {
       summaryPrs = 0;
       summaryVsLast = null;
@@ -420,12 +482,10 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
   int summaryPrs = 0;
   double? summaryVsLast;
 
-  void _computeSummaryHighlights(List<LoggedExercise> justLogged, [LoggedSession? currentSession]) {
-    final current = currentSession ?? (sessions.isNotEmpty ? sessions.last : null);
+  void _computeSummaryHighlights(List<LoggedExercise> justLogged) {
     var prs = 0;
     for (final e in justLogged) {
       final previousBest = sessions
-          .where((s) => s != current)
           .expand((s) => s.exercises)
           .where((x) => x.id == e.id)
           .fold(0.0, (m, x) => math.max(m, x.bestOneRm));
@@ -436,13 +496,32 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     final ids = justLogged.map((e) => e.id).toSet();
     LoggedSession? previous;
     for (final s in sessions.reversed) {
-      if (s == current) continue;
       if (s.exercises.any((e) => ids.contains(e.id))) {
         previous = s;
         break;
       }
     }
     summaryVsLast = previous?.volume;
+  }
+
+  void resumeLoggedSession(LoggedSession ls) {
+    if (session != null && !session!.complete) return;
+    sessions.remove(ls);
+    final s = WorkoutSession()
+      ..loggedAt = ls.date
+      ..exercises = ls.exercises
+          .map((e) => SessionExercise(e.id, e.name, e.primary,
+              e.sets.map((x) => SessionSet(x.reps, x.weight, true, kind: x.kind)).toList()))
+          .toList();
+    _restTimer?.cancel();
+    _elapsedBefore = ls.durationSec;
+    sessionPaused = false;
+    _startTicking();
+    session = s;
+    resetRoute('session');
+    persistNow();
+    _refreshWidgets();
+    notifyListeners();
   }
 
   String get summaryDurationLabel {
@@ -461,8 +540,7 @@ mixin WorkoutState on FitCore, SettingsState, LibraryState, StatsState, Routines
     selectedMuscles.clear();
     sessionPicks.clear();
     trainStep = 'select';
-    route = 'home';
-    prevRoute = 'home';
+    resetRoute('home');
     persistNow();
     notifyListeners();
   }

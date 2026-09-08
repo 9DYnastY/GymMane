@@ -4,15 +4,21 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../l10n/l10n.dart';
 import '../screens/about_screen.dart';
+import '../screens/compare_screen.dart';
 import '../screens/exercise_detail_screen.dart';
 import '../screens/exercises_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/measures_screen.dart';
+import '../screens/note_edit_screen.dart';
+import '../screens/notes_screen.dart';
 import '../screens/onboarding_screen.dart';
+import '../screens/places_screen.dart';
 import '../screens/progress_screen.dart';
 import '../screens/routine_edit_screen.dart';
 import '../screens/routines_screen.dart';
 import '../screens/session_screen.dart';
 import '../screens/settings_screen.dart';
+import '../screens/timeline_screen.dart';
 import '../screens/tool_detail_screen.dart';
 import '../screens/tools_screen.dart';
 import '../screens/train_screen.dart';
@@ -20,6 +26,7 @@ import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_background.dart';
+import '../widgets/dialogs.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -49,7 +56,6 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         state == AppLifecycleState.detached) {
       fit.persistNow();
     }
-    // al volver de los ajustes del sistema el permiso puede haber cambiado
     if (state == AppLifecycleState.resumed) fit.refreshAlarmPermission();
   }
 
@@ -90,46 +96,26 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     );
   }
 
-  Future<bool> _confirmDiscard(BuildContext context) async {
-    final gc = context.gc;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (dctx) => AlertDialog(
-        backgroundColor: gc.bgRaised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(t.discardTitle, style: AppTheme.d(18, weight: FontWeight.w700, color: gc.text)),
-        content: Text(t.discardBody,
-            style: AppTheme.s(13, color: gc.textSecondary)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dctx).pop(false),
-            child: Text(t.keepTraining, style: AppTheme.s(14, color: gc.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dctx).pop(true),
-            child: Text(t.discard, style: AppTheme.s(14, weight: FontWeight.w700, color: gc.accent)),
-          ),
-        ],
-      ),
-    );
-    return ok ?? false;
-  }
+  Future<bool> _confirmDiscard(BuildContext context) => askConfirm(
+        context,
+        title: t.discardTitle,
+        body: t.discardBody,
+        cancelLabel: t.keepTraining,
+        confirmLabel: t.discard,
+      );
 
   Widget _animatedScreen() {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 280),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      transitionBuilder: (child, animation) {
-        final slide = Tween<Offset>(
-          begin: const Offset(0, 0.018),
-          end: Offset.zero,
-        ).animate(animation);
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(position: slide, child: child),
-        );
-      },
+      duration: const Duration(milliseconds: 260),
+      switchInCurve: const Interval(0.35, 1, curve: Curves.easeOutCubic),
+      switchOutCurve: const Interval(0.6, 1, curve: Curves.easeOut),
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.97, end: 1).animate(animation),
+          child: child,
+        ),
+      ),
       layoutBuilder: (currentChild, previousChildren) => Stack(
         children: <Widget>[
           for (final c in previousChildren) Positioned.fill(child: c),
@@ -164,6 +150,18 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         return RoutinesScreen();
       case 'routine-edit':
         return RoutineEditScreen();
+      case 'measures':
+        return MeasuresScreen();
+      case 'places':
+        return PlacesScreen();
+      case 'timeline':
+        return TimelineScreen();
+      case 'compare':
+        return CompareScreen();
+      case 'notes':
+        return NotesScreen();
+      case 'note-edit':
+        return NoteEditScreen(key: ValueKey(fit.editingNoteId ?? 'new'));
       case 'home':
       default:
         return HomeScreen();

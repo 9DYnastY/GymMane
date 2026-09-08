@@ -82,7 +82,9 @@ void main() {
     final pastDate = DateTime(2026, 8, 15, 10, 0);
 
     final s1 = fit.createPastSession(pastDate, durationSec: 2000);
-    fit.addLoggedSet(s1, LoggedExercise('squat', 'Squat', 'quads', []), reps: 10, weight: 100);
+    final ex = LoggedExercise('squat', 'Squat', 'quads', []);
+    s1.exercises.add(ex);
+    fit.addLoggedSet(ex, reps: 10, weight: 100);
 
     expect(fit.sessions.length, 1);
 
@@ -101,12 +103,12 @@ void main() {
     final s1 = fit.createPastSession(day1, durationSec: 1000);
     final ex1 = LoggedExercise('pullup', 'Pull-up', 'back', []);
     s1.exercises.add(ex1);
-    fit.addLoggedSet(s1, ex1, reps: 8, weight: 0);
+    fit.addLoggedSet(ex1, reps: 8, weight: 0);
 
     final s2 = fit.createPastSession(day2, durationSec: 1500);
     final ex2 = LoggedExercise('deadlift', 'Deadlift', 'back', []);
     s2.exercises.add(ex2);
-    fit.addLoggedSet(s2, ex2, reps: 5, weight: 120);
+    fit.addLoggedSet(ex2, reps: 5, weight: 120);
 
     expect(fit.sessions.length, 2);
 

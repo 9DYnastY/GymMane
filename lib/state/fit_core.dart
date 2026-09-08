@@ -10,6 +10,13 @@ double _round3(double n) => (n * 1000).round() / 1000;
 double _roundTo(double n, double step) => (n / step).round() * step;
 DateTime _dayKey(DateTime d) => DateTime(d.year, d.month, d.day);
 
+DateTime shiftDays(DateTime d, int n) => DateTime(d.year, d.month, d.day + n);
+
+int daysBetween(DateTime from, DateTime to) =>
+    DateTime.utc(to.year, to.month, to.day)
+        .difference(DateTime.utc(from.year, from.month, from.day))
+        .inDays;
+
 void mergeLoggedSessions(LoggedSession target, LoggedSession incoming) {
   target.durationSec += incoming.durationSec;
   if (incoming.date.isAfter(target.date)) {
@@ -33,22 +40,43 @@ void mergeLoggedSessions(LoggedSession target, LoggedSession incoming) {
 
 const int kHeatmapDays = 84;
 
+const int heatLevels = 4;
+
+int heatLevel(double v) {
+  if (v <= 0) return 0;
+  if (v < 0.25) return 1;
+  if (v < 0.5) return 2;
+  if (v < 0.75) return 3;
+  return 4;
+}
+
 abstract class FitCore extends ChangeNotifier {
   Map<String, dynamic> toJson();
 
   String route = 'home';
-  String prevRoute = 'home';
+  final List<String> _routeStack = [];
   final Map<String, bool> favorites = {};
 
   Profile profile = Profile();
 
   final List<LoggedSession> sessions = [];
   final List<BodyweightEntry> bodyweight = [];
-  final Map<String, List<ExerciseNote>> exNotes = {};
+  final List<GymNote> notes = [];
+  final List<BodyMeasure> measures = [];
+  final List<ProgressEntry> shots = [];
   final Set<String> checkins = {};
   final List<Routine> routines = [];
   final Map<int, String> weeklyPlan = {};
   final List<Exercise> customExercises = [];
+  final List<GymPlace> places = [];
+
+  final Map<String, String> exerciseMedia = {};
+
+  final Map<String, int> exerciseRest = {};
+
+  final Set<String> repsOnly = {};
+
+  final Set<String> repsOnlyOff = {};
   VoidCallback? onWidgetsShouldUpdate;
 
   void _refreshWidgets() {
@@ -83,8 +111,32 @@ abstract class FitCore extends ChangeNotifier {
   void goSettings() => _setRoute('settings', reset: true);
 
   void _setRoute(String r, {bool reset = false}) {
+    if (reset) _routeStack.clear();
     route = r;
-    if (reset) prevRoute = r;
+    notifyListeners();
+  }
+
+  void pushRoute(String r) {
+    if (route != r) _routeStack.add(route);
+    route = r;
+    notifyListeners();
+  }
+
+  void resetRoute(String r) {
+    _routeStack.clear();
+    route = r;
+  }
+
+  void popRoute({String fallback = 'home'}) {
+    while (_routeStack.isNotEmpty) {
+      final r = _routeStack.removeLast();
+      if (r != route) {
+        route = r;
+        notifyListeners();
+        return;
+      }
+    }
+    route = fallback == route ? 'home' : fallback;
     notifyListeners();
   }
 

@@ -135,7 +135,7 @@ void main() {
     expect(s.setCount, 1);
     expect(s.volume, 300);
 
-    fit.addLoggedSet(s, s.exercises.first, reps: 8, weight: 70);
+    fit.addLoggedSet(s.exercises.first, reps: 8, weight: 70);
     expect(s.setCount, 2);
     expect(s.volume, 300 + 560);
 
