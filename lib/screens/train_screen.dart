@@ -7,6 +7,7 @@ import '../state/fit_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/body_map.dart';
+import '../widgets/exercise_filter_bar.dart';
 import '../widgets/exercise_media.dart';
 import '../widgets/svg_icon.dart';
 import '../widgets/ui_kit.dart';
@@ -22,10 +23,24 @@ class TrainScreen extends StatefulWidget {
 class _TrainScreenState extends State<TrainScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _q = '';
+  bool _favsOnly = false;
+  String? _placeId;
+  String? _muscle;
+  bool _noGearOnly = false;
+  String? _equipment;
+  String? _difficulty;
 
-  void _clearSearch() {
+  void _clearFilters() {
     _searchCtrl.clear();
-    setState(() => _q = '');
+    setState(() {
+      _q = '';
+      _favsOnly = false;
+      _placeId = null;
+      _muscle = null;
+      _noGearOnly = false;
+      _equipment = null;
+      _difficulty = null;
+    });
   }
 
   @override
@@ -146,16 +161,36 @@ class _TrainScreenState extends State<TrainScreen> {
   }
 
   Widget _review(BuildContext context, GymColors gc) {
-    final searching = _q.trim().isNotEmpty;
-
-    final exercises = searching ? fit.trainSearchResults(_q) : fit.reviewExercises();
+    final hasFilters = _q.trim().isNotEmpty ||
+        _favsOnly ||
+        (_placeId != null && _placeId!.isNotEmpty) ||
+        _muscle != null ||
+        _noGearOnly ||
+        _equipment != null ||
+        _difficulty != null;
+    final baseExercises = (_muscle != null || _q.trim().isNotEmpty) ? fit.allExercises : fit.reviewExercises();
+    final exercises = filterExerciseList(
+      baseExercises,
+      query: _q,
+      favoritesOnly: _favsOnly,
+      favorites: fit.favorites,
+      placeId: _placeId,
+      places: fit.places,
+      muscleFilter: _muscle,
+      noGearOnly: _noGearOnly,
+      equipmentFilter: _equipment,
+      difficultyFilter: _difficulty,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
             GestureDetector(
-              onTap: fit.trainBack,
+              onTap: () {
+                _clearFilters();
+                fit.trainBack();
+              },
               child: SvgPathIcon(Ic.chevronLeft, size: 20, color: gc.textSecondary),
             ),
             const SizedBox(width: 10),
@@ -169,15 +204,49 @@ class _TrainScreenState extends State<TrainScreen> {
           ],
         ),
         const SizedBox(height: 14),
-        _searchRow(context, gc),
+        ExerciseFilterBar(
+          searchController: _searchCtrl,
+          searchHint: t.searchAllExercises,
+          onSearchChanged: (v) => setState(() => _q = v),
+          favoritesOnly: _favsOnly,
+          onToggleFavorites: () => setState(() => _favsOnly = !_favsOnly),
+          places: fit.places,
+          selectedPlaceId: _placeId,
+          onSelectPlace: (p) => setState(() => _placeId = p),
+          onManagePlaces: () => fit.goPlaces(),
+          selectedMuscle: _muscle,
+          onSelectMuscle: (m) => setState(() => _muscle = m),
+          noGearOnly: _noGearOnly,
+          onToggleNoGear: () => setState(() {
+            _noGearOnly = !_noGearOnly;
+            if (_noGearOnly) _equipment = null;
+          }),
+          selectedEquipment: _equipment,
+          onSelectEquipment: (e) => setState(() {
+            _equipment = e;
+            if (_equipment != null) _noGearOnly = false;
+          }),
+          selectedDifficulty: _difficulty,
+          onSelectDifficulty: (d) => setState(() => _difficulty = d),
+          favoriteCount: fit.favouriteCount,
+          onClearAll: _clearFilters,
+          actions: [
+            _resetPicksBtn(gc),
+            _createExerciseBtn(context, gc),
+          ],
+        ),
         const SizedBox(height: 14),
-        if (!searching && exercises.isNotEmpty) ...[
+        if (!hasFilters && exercises.isNotEmpty) ...[
           Text(t.pickedHint(exercises.length),
+              style: AppTheme.s(12, color: gc.textTertiary)),
+          const SizedBox(height: 12),
+        ] else if (hasFilters && exercises.isNotEmpty) ...[
+          Text(t.libraryCount(exercises.length),
               style: AppTheme.s(12, color: gc.textTertiary)),
           const SizedBox(height: 12),
         ],
         if (exercises.isEmpty)
-          _emptyReview(context, gc, searching)
+          _emptyReview(context, gc, hasFilters)
         else
           for (final ex in exercises) ...[
             _pickRow(gc, ex),
@@ -187,85 +256,49 @@ class _TrainScreenState extends State<TrainScreen> {
     );
   }
 
-  Widget _searchRow(BuildContext context, GymColors gc) {
-    final hasQuery = _q.isNotEmpty;
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: gc.bgRaised,
-              border: Border.all(color: gc.border),
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: Row(children: [
-              SvgPathIcon(Ic.search, size: 16, color: gc.textSecondary),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: _searchCtrl,
-                  onChanged: (v) => setState(() => _q = v),
-                  style: AppTheme.s(14, color: gc.text),
-                  cursorColor: gc.accent,
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    border: InputBorder.none,
-                    hintText: t.searchAllExercises,
-                    hintStyle: AppTheme.s(14, color: gc.textSecondary),
-                  ),
-                ),
-              ),
-              if (hasQuery)
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _clearSearch,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: SvgPathIcon(Ic.closeThin, size: 14, color: gc.textSecondary),
-                  ),
-                ),
-            ]),
-          ),
+  Widget _resetPicksBtn(GymColors gc) {
+    final hasPicks = fit.sessionPicks.isNotEmpty;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => setState(() => fit.toggleResetPicks()),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: hasPicks ? gc.emberSoft : gc.bgRaised,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: hasPicks ? gc.ember.withValues(alpha: 0.3) : gc.border),
         ),
-        const SizedBox(width: 10),
-        GestureDetector(
-          onTap: fit.toggleResetPicks,
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: gc.bgRaised,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: gc.border),
-            ),
-            child: Icon(PhosphorIconsRegular.arrowCounterClockwise, size: 20, color: gc.textSecondary),
-          ),
+        child: Icon(
+          PhosphorIconsRegular.arrowCounterClockwise,
+          size: 20,
+          color: hasPicks ? gc.ember : gc.textTertiary,
         ),
-        const SizedBox(width: 10),
-        GestureDetector(
-          onTap: () => showCreateExerciseSheet(context, onCreated: (id) {
-            fit.togglePick(id);
-            _clearSearch();
-          }),
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: gc.emberSoft,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: gc.border),
-            ),
-            child: Icon(PhosphorIconsRegular.plus, size: 20, color: gc.ember),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _emptyReview(BuildContext context, GymColors gc, bool searching) {
-    if (searching) {
+  Widget _createExerciseBtn(BuildContext context, GymColors gc) {
+    return GestureDetector(
+      onTap: () => showCreateExerciseSheet(context, onCreated: (id) {
+        fit.togglePick(id);
+        _clearFilters();
+      }),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: gc.emberSoft,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: gc.border),
+        ),
+        child: Icon(PhosphorIconsRegular.plus, size: 20, color: gc.ember),
+      ),
+    );
+  }
+
+  Widget _emptyReview(BuildContext context, GymColors gc, bool hasFilters) {
+    if (hasFilters) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 8),
         child: Column(
@@ -277,7 +310,7 @@ class _TrainScreenState extends State<TrainScreen> {
               behavior: HitTestBehavior.opaque,
               onTap: () => showCreateExerciseSheet(context, onCreated: (id) {
                 fit.togglePick(id);
-                _clearSearch();
+                _clearFilters();
               }),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

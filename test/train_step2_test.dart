@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gymmane/app/gymmane_app.dart';
 import 'package:gymmane/state/fit_state.dart';
+import 'package:gymmane/widgets/exercise_filter_bar.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 void main() {
-  testWidgets('TrainScreen step 2 displays reset picks button and toggles selection', (tester) async {
+  testWidgets('TrainScreen step 2 displays ExerciseFilterBar and reset button', (tester) async {
     fit.onboarded = true;
     fit.selectedMuscles.clear();
     fit.selectedMuscles.addAll(['chest', 'triceps']);
@@ -13,6 +14,9 @@ void main() {
 
     await tester.pumpWidget(const GymManeApp());
     await tester.pumpAndSettle();
+
+    // Verify ExerciseFilterBar is present
+    expect(find.byType(ExerciseFilterBar), findsOneWidget);
 
     // Verify Reset button icon is present
     expect(find.byIcon(PhosphorIconsRegular.arrowCounterClockwise), findsOneWidget);
